@@ -37,20 +37,30 @@ class Query {
 	}
 
 	async makeRequest(petType) {
-		const capitalizedPetType = petType[0].toUpperCase() + petType.slice(1).toLowerCase();
+		try {
+			const capitalizedPetType = petType[0].toUpperCase() + petType.slice(1).toLowerCase();
 
-		const response = await this.openai.createCompletion({
-			model: "text-davinci-003",
-			prompt: this.generatePrompt(capitalizedPetType),
-			temperature: 0.6,
-		})
+			const response = await this.openai.createCompletion({
+				model: "text-davinci-003",
+				prompt: this.generatePrompt(capitalizedPetType),
+				temperature: 0.6,
+			})
 
-		const choices = response.data.choices
+			const choices = response.data.choices
+			return process.env.DEBUGGING ? { response, choices } : choices[0].text
 
-		if (process.env.DEBUGGING) {
-			return { response, choices }
-		} else {
-			return choices[0].text
+		} catch(err) {
+			let message = ""
+
+			switch (err.message) {
+				case "Cannot read properties of undefined (reading 'toUpperCase')":
+					message = "It looks like you add no input. Try again."
+					break;
+				default:
+					message = "OpenAI service are not working properly right now. Try again later."
+			}
+
+			return message
 		}
 	}
 }
