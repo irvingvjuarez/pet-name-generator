@@ -46,7 +46,12 @@ class Query {
 		})
 
 		const choices = response.data.choices
-		return choices[0].text
+
+		if (process.env.DEBUGGING) {
+			return { response, choices }
+		} else {
+			return choices[0].text
+		}
 	}
 }
 
